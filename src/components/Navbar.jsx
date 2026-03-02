@@ -191,7 +191,7 @@ const Navbar = () => {
 
               {/* Resume Button */}
               <a
-                href="/resume.pdf"
+                href="/Amarnath_Kumar_BTech2026.pdf"
                 download
                 className="ml-2 lg:ml-4 px-5 lg:px-6 py-2 rounded-full bg-gradient-to-r from-electric-blue to-cyan-400 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95"
               >
@@ -277,7 +277,7 @@ const Navbar = () => {
                 ))}
 
                 <a
-                  href="/resume.pdf"
+                  href="/Amarnath_Kumar_BTech2026.pdf"
                   download
                   className="mt-4 px-5 py-3 rounded-lg bg-gradient-to-r from-electric-blue to-cyan-400 text-white font-semibold text-center hover:scale-105 transition-transform active:scale-95"
                 >
