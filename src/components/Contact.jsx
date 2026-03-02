@@ -86,25 +86,46 @@ const Contact = () => {
     });
 
     try {
+      // Send message to admin
       await emailjs.sendForm(
         process.env.REACT_APP_EMAILJS_SERVICE_ID,
         process.env.REACT_APP_EMAILJS_TEMPLATE_ID,
         formRef.current,
+        process.env.REACT_APP_EMAILJS_PUBLIC_KEY
       );
+
+      // Send auto reply to user (if template exists)
+      if (process.env.REACT_APP_EMAILJS_AUTOREPLY_TEMPLATE_ID) {
+        await emailjs.sendForm(
+          process.env.REACT_APP_EMAILJS_SERVICE_ID,
+          process.env.REACT_APP_EMAILJS_AUTOREPLY_TEMPLATE_ID,
+          formRef.current,
+          process.env.REACT_APP_EMAILJS_PUBLIC_KEY
+        );
+      }
 
       setFormStatus({
         submitting: false,
         submitted: true,
         error: false,
-        message: "Message sent successfully! I’ll get back to you soon.",
+        message: "Message sent successfully! Check your email 😊",
       });
 
-      setFormData({ name: "", email: "", subject: "", message: "" });
+      // Reset form after successful submission
+      setFormData({
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      });
 
+      // Auto-hide success message after 5 seconds
       setTimeout(() => {
         setFormStatus((prev) => ({ ...prev, submitted: false }));
-      }, 4000);
+      }, 5000);
+      
     } catch (err) {
+      console.error("EmailJS Error:", err);
       setFormStatus({
         submitting: false,
         submitted: false,
@@ -112,6 +133,7 @@ const Contact = () => {
         message: "Failed to send message. Please try again later.",
       });
 
+      // Auto-hide error message after 4 seconds
       setTimeout(() => {
         setFormStatus((prev) => ({ ...prev, error: false }));
       }, 4000);
@@ -141,24 +163,22 @@ const Contact = () => {
     },
   ];
 
+  // Social links with hardcoded usernames (not from .env)
   const socialLinks = [
     {
       icon: FaGithub,
-      url: `https://github.com/${
-        process.env.REACT_APP_GITHUB_USERNAME || "amarnathkumarx"
-      }`,
+      url: "https://github.com/amarnathkumarx",
+      username: "amarnathkumarx"
     },
     {
       icon: FaLinkedin,
-      url: `https://linkedin.com/in/${
-        process.env.REACT_APP_LINKEDIN_USERNAME || "amarnathkumarx"
-      }`,
+      url: "https://linkedin.com/in/amarnathkumarx",
+      username: "amarnathkumarx"
     },
     {
       icon: FaTwitter,
-      url: `https://twitter.com/${
-        process.env.REACT_APP_TWITTER_USERNAME || "amarnathkumarx"
-      }`,
+      url: "https://twitter.com/amarnathkumarx",
+      username: "amarnathkumarx"
     },
   ];
 
@@ -167,7 +187,10 @@ const Contact = () => {
       id="contact"
       className="py-16 md:py-20 bg-navy-darker relative overflow-hidden"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-navy-dark/50 pointer-events-none"></div>
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           ref={ref}
           initial={{ opacity: 0, y: 40 }}
@@ -183,34 +206,50 @@ const Contact = () => {
               </span>
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-electric-blue to-cyan-400 mx-auto rounded-full"></div>
+            <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+              Have a question or want to work together? Feel free to reach out!
+            </p>
           </div>
 
           {/* Status Messages */}
           {formStatus.submitted && (
-            <div className="max-w-xl mx-auto mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg flex items-center gap-3 text-green-400">
-              <FaCheck />
-              {formStatus.message}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="max-w-xl mx-auto mb-6 p-4 bg-green-500/20 border border-green-500 rounded-lg flex items-center gap-3 text-green-400"
+            >
+              <FaCheck className="flex-shrink-0" />
+              <span>{formStatus.message}</span>
+            </motion.div>
           )}
 
           {formStatus.error && (
-            <div className="max-w-xl mx-auto mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg flex items-center gap-3 text-red-400">
-              <FaTimes />
-              {formStatus.message}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="max-w-xl mx-auto mb-6 p-4 bg-red-500/20 border border-red-500 rounded-lg flex items-center gap-3 text-red-400"
+            >
+              <FaTimes className="flex-shrink-0" />
+              <span>{formStatus.message}</span>
+            </motion.div>
           )}
 
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left Contact Info */}
             <div className="space-y-6">
               {contactInfo.map((info, index) => (
-                <a
+                <motion.a
                   key={index}
                   href={info.link}
-                  className="block bg-navy-light/30 p-5 rounded-xl border border-electric-blue/20 hover:border-electric-blue/40 transition"
+                  target={info.link === "#" ? undefined : "_blank"}
+                  rel={info.link === "#" ? undefined : "noopener noreferrer"}
+                  whileHover={{ scale: 1.02, x: 5 }}
+                  className="block bg-navy-light/30 p-5 rounded-xl border border-electric-blue/20 hover:border-electric-blue/40 transition-all duration-300 group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gradient-to-r from-electric-blue to-cyan-400 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-r from-electric-blue to-cyan-400 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
                       <info.icon className="text-white" />
                     </div>
                     <div>
@@ -218,92 +257,130 @@ const Contact = () => {
                       <p className="text-white font-medium">{info.value}</p>
                     </div>
                   </div>
-                </a>
+                </motion.a>
               ))}
 
               {/* Social Links */}
               <div className="bg-navy-light/30 p-6 rounded-xl border border-electric-blue/20">
                 <h3 className="text-lg font-semibold mb-4">Follow Me</h3>
-                <div className="flex gap-4">
-                  {socialLinks.map((social, index) => (
-                    <motion.a
-                      key={index}
-                      href={social.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ scale: 1.15, rotate: 5 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="w-10 h-10 bg-navy-dark rounded-lg flex items-center justify-center border border-transparent hover:border-electric-blue hover:text-electric-blue text-gray-400 transition"
-                    >
-                      <social.icon />
-                    </motion.a>
-                  ))}
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-gray-400 mb-2">Connect with me on social media:</p>
+                  <div className="flex gap-4">
+                    {socialLinks.map((social, index) => (
+                      <motion.a
+                        key={index}
+                        href={social.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        whileHover={{ scale: 1.15, rotate: 5 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-10 h-10 bg-navy-dark rounded-lg flex items-center justify-center border border-transparent hover:border-electric-blue hover:text-electric-blue text-gray-400 transition-all duration-300"
+                        title={`Follow me on ${social.icon.name.replace('Fa', '')}`}
+                      >
+                        <social.icon />
+                      </motion.a>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">
+                    @{socialLinks[0].username} on all platforms
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <form
+              <motion.form
                 ref={formRef}
                 onSubmit={handleSubmit}
-                className="bg-navy-light/30 p-8 rounded-2xl border border-electric-blue/20"
+                initial={{ opacity: 0, x: 20 }}
+                animate={inView ? { opacity: 1, x: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="bg-navy-light/30 p-8 rounded-2xl border border-electric-blue/20 backdrop-blur-sm"
               >
                 <div className="grid sm:grid-cols-2 gap-6 mb-6">
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Your Name"
-                    className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue"
-                  />
+                  <div>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      placeholder="Your Name"
+                      className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue transition-colors"
+                      required
+                    />
+                    {formData.name && formData.name.length < 2 && (
+                      <p className="text-xs text-red-400 mt-1">Name must be at least 2 characters</p>
+                    )}
+                  </div>
 
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    placeholder="Your Email"
-                    className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue"
-                  />
+                  <div>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      placeholder="Your Email"
+                      className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue transition-colors"
+                      required
+                    />
+                    {formData.email && !validateEmail(formData.email) && (
+                      <p className="text-xs text-red-400 mt-1">Please enter a valid email</p>
+                    )}
+                  </div>
                 </div>
 
-                <input
-                  type="text"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={(e) =>
-                    setFormData({ ...formData, subject: e.target.value })
-                  }
-                  placeholder="Subject"
-                  className="w-full px-4 py-3 mb-6 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue"
-                />
+                <div className="mb-6">
+                  <input
+                    type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    placeholder="Subject"
+                    className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none focus:border-electric-blue transition-colors"
+                    required
+                  />
+                  {formData.subject && formData.subject.length < 3 && (
+                    <p className="text-xs text-red-400 mt-1">Subject must be at least 3 characters</p>
+                  )}
+                </div>
 
-                <textarea
-                  name="message"
-                  rows="4"
-                  maxLength="500"
-                  value={formData.message}
-                  onChange={(e) =>
-                    setFormData({ ...formData, message: e.target.value })
-                  }
-                  placeholder="Your Message..."
-                  className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none resize-none focus:border-electric-blue"
-                />
+                <div>
+                  <textarea
+                    name="message"
+                    rows="4"
+                    maxLength="500"
+                    value={formData.message}
+                    onChange={(e) =>
+                      setFormData({ ...formData, message: e.target.value })
+                    }
+                    placeholder="Your Message..."
+                    className="w-full px-4 py-3 bg-navy-dark border border-electric-blue/20 rounded-lg text-white outline-none resize-none focus:border-electric-blue transition-colors"
+                    required
+                  />
+                  <div className="flex justify-between items-center mt-2">
+                    <p className="text-xs text-gray-500">
+                      {formData.message.length < 10 && formData.message.length > 0 ? (
+                        <span className="text-red-400">Minimum 10 characters required</span>
+                      ) : (
+                        <span>Message length: {formData.message.length}/500</span>
+                      )}
+                    </p>
+                  </div>
+                </div>
 
-                <p className="text-right text-xs text-gray-500 mt-2">
-                  {formData.message.length}/500
-                </p>
-
-                <button
+                <motion.button
                   type="submit"
                   disabled={formStatus.submitting || !isFormValid()}
-                  className="w-full mt-6 py-3 bg-gradient-to-r from-electric-blue to-cyan-500 rounded-lg font-semibold flex justify-center items-center gap-2 disabled:opacity-50"
+                  whileHover={{ scale: formStatus.submitting || !isFormValid() ? 1 : 1.02 }}
+                  whileTap={{ scale: formStatus.submitting || !isFormValid() ? 1 : 0.98 }}
+                  className="w-full mt-6 py-3 bg-gradient-to-r from-electric-blue to-cyan-500 rounded-lg font-semibold flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   {formStatus.submitting ? (
                     <>
@@ -314,8 +391,8 @@ const Contact = () => {
                       Send Message <FaPaperPlane />
                     </>
                   )}
-                </button>
-              </form>
+                </motion.button>
+              </motion.form>
             </div>
           </div>
         </motion.div>
