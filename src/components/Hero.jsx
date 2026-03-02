@@ -10,7 +10,6 @@ import {
   FaCode,
   FaEnvelope,
   FaPhone,
-  FaMapMarkerAlt,
 } from "react-icons/fa";
 import { HiMail, HiAcademicCap, HiBriefcase } from "react-icons/hi";
 import { MdLocationOn } from "react-icons/md";
